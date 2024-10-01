@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,6 +34,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,11 +44,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -56,108 +60,151 @@ import com.example.mintbolt.R
 @Composable
 fun LoginScreen(navController: NavHostController)
 {
-    val primaryColor = Color(0xFF00C853)
+
     val backgroundColor = Color(0xFF00C853)
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
-    Box(
+    Surface(
         modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundColor)
+            .fillMaxSize(),
+        color = colorResource(id = R.color.bgcolor)
+
     ) {
+
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp),
+                .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Welcome",
-                color = Color.White
+            Text(text = "Welcome",
+                modifier = Modifier.padding(top = 64.dp),
+                color = Color.Black,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(48.dp))
 
             Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                shape = RoundedCornerShape(topStart = 52.dp, topEnd = 52.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color.White.copy(alpha = 0.8f) // White with 80% opacity
+                    containerColor = colorResource(id = R.color.primary_bg)
                 ),
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(top = 52.dp, start = 32.dp, end = 32.dp)
                 ) {
+                    Spacer(modifier = Modifier.height(24.dp))
+
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = { Text("Username Or Email") },
+                        label = { Text("example@example.com") }, // This is the label, which floats to the top
+                        placeholder = { Text("Enter your email", color = colorResource(id = R.color.primary_text)) }, // Optional placeholder
                         modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(38.dp),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = primaryColor,
-                            unfocusedBorderColor = primaryColor.copy(alpha = 0.5f)
+                            focusedBorderColor = colorResource(id = R.color.primary_text),
+                            unfocusedBorderColor = colorResource(id = R.color.primary_text),
+                            containerColor = colorResource(id = R.color.primary_text)
                         )
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Spacer(modifier = Modifier.height(24.dp))
 
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
                         label = { Text("Password") },
                         modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(38.dp),
                         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         trailingIcon = {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Icon(painter = painterResource(id = if(passwordVisible){R.drawable.visibility}else{R.drawable.visibility_off}), contentDescription = " ")
+                                Icon(
+                                    painter = painterResource(
+                                        id = if (passwordVisible) {
+                                            R.drawable.visibility
+                                        } else {
+                                            R.drawable.visibility_off
+                                        }
+                                    ), contentDescription = " "
+                                )
                             }
                         },
                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = primaryColor,
-                            unfocusedBorderColor = primaryColor.copy(alpha = 0.5f)
+                            focusedBorderColor = colorResource(id = R.color.primary_text),
+                            unfocusedBorderColor = colorResource(id = R.color.primary_text),
+                            containerColor = colorResource(id = R.color.primary_text)
                         )
                     )
                 }
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
-                onClick = {
-                    navController.navigate("main")
+                Spacer(modifier = Modifier.height(48.dp))
+
+                Button(
+                    onClick = {
+                        navController.navigate("main")
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 128.dp, end = 128.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.bgcolor))
+                ) {
+                    Text("Log In", color = Color.Black)
+                }
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                TextButton(onClick = { /* Handle forgot password */
+                    navController.navigate("rp1")
                 },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
-            ) {
-                Text("Log In", color = Color.White)
-            }
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(start = 3.dp)){
+                    Text("Forgot Password?", color = Color.Black,
+                        fontSize = 14.sp)
 
-            Spacer(modifier = Modifier.height(16.dp))
+                }
 
-            TextButton(onClick = { /* Handle forgot password */
-            navController.navigate("rp1")}) {
-                Text("Forgot Password?", color = Color.White)
-            }
+                Spacer(modifier = Modifier.height(2.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = { /* Handle sign up */
+                    navController.navigate("signup")
+                },
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.secondary_text))
+                ) {
+                    Text("Sign Up", color = colorResource(id = R.color.tertiary_text))
+                }
 
-            TextButton(onClick = { /* Handle sign up */
-            navController.navigate("signup")}) {
-                Text("Sign Up", color = Color.White)
-            }
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(32.dp))
+                Row(
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text("Use  ", color = Color.Black)
+                    Text(text = "Fingerprint  ",color = Color.Blue)
+                    Text("To Access", color = Color.Black)
+                }
 
-            Text("Use Fingerprint To Access", color = Color.White)
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
 
-//            Text("or sign up with", color = Color.White)
-//
-//            Spacer(modifier = Modifier.height(16.dp))
+                Text("or sign up with",
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    color = Color.Black,
+                    )
+
+                Spacer(modifier = Modifier.height(16.dp))
 //
 //            Row(
 //                horizontalArrangement = Spacer.Between,
@@ -176,8 +223,16 @@ fun LoginScreen(navController: NavHostController)
 //                    )
 //                }
 //            }
+
+            }
         }
     }
+}
+
+@Preview
+@Composable
+fun LoginScreenPreview() {
+    LoginScreen(navController = NavHostController(LocalContext.current))
 }
 
 
