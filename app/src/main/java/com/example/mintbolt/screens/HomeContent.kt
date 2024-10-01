@@ -3,6 +3,7 @@ package com.example.mintbolt.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,7 +13,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -22,6 +25,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,7 +53,7 @@ fun HomeContent(navController: NavHostController)
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroundColor)
+            .background(colorResource(id = R.color.bgcolor))
 
     ) {
         Column(
@@ -67,7 +71,7 @@ fun HomeContent(navController: NavHostController)
                 .fillMaxHeight()
                 .clip(RoundedCornerShape(topStart = 52.dp, topEnd = 52.dp))
         ) {
-            ChatbotButton()
+            ChatbotButton(navController)
             Spacer(modifier = Modifier.height(16.dp))
             FeaturesGrid()
 
@@ -112,7 +116,7 @@ fun ExpenseSummaryCard(backgroundColor: Color) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp)),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor)
+        colors = CardDefaults.cardColors(containerColor = colorResource(id = R.color.bgcolor))
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -131,12 +135,7 @@ fun ExpenseSummaryCard(backgroundColor: Color) {
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            LinearProgressIndicator(
-                progress = 0.35f,
-                modifier = Modifier.fillMaxWidth(),
-                color = Color.White,
-                trackColor = Color.White.copy(alpha = 0.3f)
-            )
+            CustomProgressBar(progress = 0.30f, amount = "$20,000.00")
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 "35% of Your Expenses Looks Good",
@@ -148,11 +147,15 @@ fun ExpenseSummaryCard(backgroundColor: Color) {
 }
 
 @Composable
-fun ChatbotButton() {
+fun ChatbotButton(navController: NavHostController) {
     Button(
-        onClick = { /* TODO */ },
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+        onClick = {
+            navController.navigate("chatbot")
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.bgcolor))
     ) {
         Text("Converse With Chatbot", color = Color.Black)
     }
@@ -160,21 +163,29 @@ fun ChatbotButton() {
 
 @Composable
 fun FeaturesGrid() {
-    Row(
-        modifier = Modifier.fillMaxWidth()
-            .padding(start = 28.dp,end = 28.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+
+    Column(
+        modifier = Modifier.verticalScroll(rememberScrollState())
     ) {
-        FeatureItem("Document\nClassification", R.drawable.document_icon)
-        FeatureItem("Manage\nTransactions", R.drawable.transactions_icon)
-    }
-    Spacer(modifier = Modifier.height(16.dp))
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        FeatureItem("Query\nDocuments", R.drawable.query_icon)
-        FeatureItem("Bill Split", R.drawable.bill_split_icon)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 24.dp, end = 24.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            FeatureItem("Document\nClassification", R.drawable.document_icon)
+            FeatureItem("Manage\nTransactions", R.drawable.transactions_icon)
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 24.dp, end = 24.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            FeatureItem("Query\nDocuments", R.drawable.query_icon)
+            FeatureItem("Bill Split", R.drawable.bill_split_icon)
+        }
     }
 }
 
@@ -182,7 +193,7 @@ fun FeaturesGrid() {
 fun FeatureItem(title: String, iconResId: Int) {
     Card(
         modifier = Modifier
-            .size(170.dp)
+            .size(150.dp)
             .clip(RoundedCornerShape(16.dp)),
         colors = CardDefaults.cardColors(containerColor = colorResource(id = R.color.bgcolor))
     ) {
@@ -196,7 +207,7 @@ fun FeatureItem(title: String, iconResId: Int) {
             Image(
                 painter = painterResource(id = iconResId),
                 contentDescription = title,
-                modifier = Modifier.size(64.dp)
+                modifier = Modifier.size(65.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -215,3 +226,49 @@ fun FeatureItem(title: String, iconResId: Int) {
 fun HomeContentPreview() {
     HomeContent(navController = NavHostController(LocalContext.current))
 }
+
+@Composable
+fun CustomProgressBar(progress: Float, amount: String) {
+    val progressColor = Color(0xFF003238)  // Dark color for the progress bar
+    val trackColor = Color(0xFFD8F3DC)     // Light background track color
+    val backgroundColor = Color(0xFF2EC4B6) // Green background
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(backgroundColor, shape = RoundedCornerShape(50.dp)) // Background rounded
+            .padding(4.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        LinearProgressIndicator(
+            progress = progress,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(25.dp)
+                .clip(RoundedCornerShape(50.dp)),
+            color = progressColor,
+            trackColor = trackColor
+        )
+
+        // Overlay for percentage and dollar amount
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "${(progress * 100).toInt()}%",
+                color = Color.White,
+
+            )
+            Text(
+                text = amount,
+                color = Color(0xFF003238),
+
+            )
+        }
+    }
+}
+

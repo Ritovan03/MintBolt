@@ -199,31 +199,6 @@ fun LoginScreen(navController: NavHostController)
                 Spacer(modifier = Modifier.height(16.dp))
 
 
-                Text("or sign up with",
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    color = Color.Black,
-                    )
-
-                Spacer(modifier = Modifier.height(16.dp))
-//
-//            Row(
-//                horizontalArrangement = Spacer.Between,
-//                modifier = Modifier.fillMaxWidth(0.5f)
-//            ) {
-//                IconButton(onClick = { /* Handle Facebook login */ }) {
-//                    Image(
-//                        painter = painterResource(id = R.drawable.facebook_icon),
-//                        contentDescription = "Facebook"
-//                    )
-//                }
-//                IconButton(onClick = { /* Handle Google login */ }) {
-//                    Image(
-//                        painter = painterResource(id = R.drawable.google_icon),
-//                        contentDescription = "Google"
-//                    )
-//                }
-//            }
-
             }
         }
     }
