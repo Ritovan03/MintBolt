@@ -89,12 +89,14 @@ fun ChatbotUI() {
     var messages by remember { mutableStateOf(listOf("ChatBot: Hello! How can I help you today?")) }
     var showOptions by remember { mutableStateOf(true) }
     var showSubOptions by remember { mutableStateOf(false) }
+    var currentMainOption by remember { mutableStateOf("") }
     var userInput by remember { mutableStateOf("") }
     var allowUserInput by remember { mutableStateOf(true) }
     var allowCameraInput by remember { mutableStateOf(false) }
     var allowGalleryInput by remember { mutableStateOf(false) }
     var allowTextInput by remember { mutableStateOf(true) }
     var shouldFetchWithDelay by remember { mutableStateOf(false) }
+    var isInGeneralQueryMode by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     var imageUri by remember { mutableStateOf<Uri?>(null) }
@@ -138,6 +140,7 @@ fun ChatbotUI() {
             .padding(16.dp)
     ) {
         // Chat messages (scrollable)
+        Spacer(modifier = Modifier.height(24.dp))
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
@@ -177,50 +180,42 @@ fun ChatbotUI() {
 
         // Options and input area (fixed at bottom)
         Column {
-            // Show options for the user
             if (showOptions) {
                 ChatbotOptions(onOptionSelected = { option ->
                     messages = messages + "User: $option"
-                    when (option) {
-                        "Give Historical Expense and Future Prediction" -> {
-                            showSubOptions = true
-                            showOptions = false
-                        }
-                        else -> {
-                            showOptions = false
-                            allowUserInput = true
-                            messages = messages + when (option) {
-                                "Query my Document" -> "ChatBot: Sure, I can help you query your document. What would you like to know?"
-                                "Summarise this invoice" -> "ChatBot: Certainly! I'd be happy to summarize an invoice for you. Please upload or provide details of the invoice you'd like summarized."
-                                else -> "ChatBot: I'm sorry, I don't have a specific response for that option. How else can I assist you?"
-                            }
-                        }
+                    currentMainOption = option
+                    if (option == "General Queries") {
+                        isInGeneralQueryMode = true
+                        showOptions = false
+                        allowUserInput = true
+                        messages = messages + "ChatBot: You're now in general query mode. Feel free to ask any question!"
+                    } else {
+                        showSubOptions = true
+                        showOptions = false
                     }
                 })
             }
 
-            // Show sub-options if "Give Historical Expense and Future Prediction" was selected
             if (showSubOptions) {
-                ChatbotSubOptions(onSubOptionSelected = { subOption ->
-                    messages = messages + "User: $subOption"
-                    showSubOptions = false
-                    allowUserInput = true
-                    when (subOption) {
-                        "Summarise My Expenses" -> {
-                            viewModel.fetchExpensesSummary(1000) // Assuming employee ID is 1
-                            messages = messages + "ChatBot: Fetching your expense summary. Please wait..."
-                        }
-                        "Analyse Trends & Expenditure Patterns" -> {
-                            viewModel.fetchARIMA(1000) // Assuming employee ID is 1
-                            messages = messages + "ChatBot: Analyzing trends and expenditure patterns. This may take a moment..."
-                        }
-                        "Expense Tracking" -> {
-                            shouldFetchWithDelay = true
-                            messages = messages + "ChatBot: Generating expense tracking visualizations. Please wait..."
+                ChatbotSubOptions(
+                    mainOption = currentMainOption,
+                    onSubOptionSelected = { subOption ->
+                        messages = messages + "User: $subOption"
+                        showSubOptions = false
+                        allowUserInput = true
+                        when (currentMainOption) {
+                            "Transaction Management & Analysis" -> handleTransactionManagement(subOption, viewModel, messages)
+                            "Document Processing & Analysis" -> handleDocumentProcessing(subOption, messages)
+                            "Payment & Invoicing" -> handlePaymentAndInvoicing(subOption, messages)
+                            "Budgeting & Finance Management" -> handleBudgetingAndFinance(subOption, messages)
+                            "General Queries" -> handleGeneralQueries(subOption, messages)
                         }
                     }
-                })
+                )
             }
+
+
+
 
             // User input section
             if (allowUserInput) {
@@ -317,7 +312,13 @@ fun ChatbotOptions(onOptionSelected: (String) -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val options = listOf("Query my Document", "Summarise this invoice", "Give Historical Expense and Future Prediction")
+        val options = listOf(
+            "Document Processing & Analysis",
+            "Payment & Invoicing",
+            "Budgeting & Finance Management",
+            "Transaction Management & Analysis",
+            "General Queries"
+        )
 
         options.forEach { option ->
             Text(
@@ -346,12 +347,19 @@ fun ChatbotOptions(onOptionSelected: (String) -> Unit) {
 }
 
 @Composable
-fun ChatbotSubOptions(onSubOptionSelected: (String) -> Unit) {
+fun ChatbotSubOptions(mainOption: String, onSubOptionSelected: (String) -> Unit) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val subOptions = listOf("Summarise My Expenses", "Analyse Trends & Expenditure Patterns", "Expense Tracking")
+        val subOptions = when (mainOption) {
+            "Transaction Management & Analysis" -> listOf("Summarise My Expenses", "Analyse Trends & Expenditure Patterns", "Expense Tracking", "Data Export to CSV")
+            "Document Processing & Analysis" -> listOf("Named Entity Recognition", "AI Driven Document Classification", "Searching & Querying Document Data", "Digitise Document[Pdf/Png]")
+            "Payment & Invoicing" -> listOf("Invoice Ingestion", "Debt & Loan Management", "Payment History")
+            "Budgeting & Finance Management" -> listOf("Net Worth", "CTC Breakdown", "Set Monthly Budget")
+            "General Queries" -> listOf("Start General Query Mode")
+            else -> listOf()
+        }
 
         subOptions.forEach { option ->
             Text(
@@ -377,6 +385,62 @@ fun ChatbotSubOptions(onSubOptionSelected: (String) -> Unit) {
             )
         }
     }
+}
+
+// Helper functions to handle different sub-options
+private fun handleTransactionManagement(subOption: String, viewModel: ExpensesViewModel, messages: List<String>): List<String> {
+    return when (subOption) {
+        "Summarise My Expenses" -> {
+            viewModel.fetchExpensesSummary(1000)
+            messages + "ChatBot: Fetching your expense summary. Please wait..."
+        }
+        "Analyse Trends & Expenditure Patterns" -> {
+            viewModel.fetchARIMA(1000)
+            messages + "ChatBot: Analyzing trends and expenditure patterns. This may take a moment..."
+        }
+        "Expense Tracking" -> {
+            viewModel.fetchBarPlot(1000)
+            viewModel.fetchPieChart(1000)
+            viewModel.fetchHeatmap(1000)
+            messages + "ChatBot: Generating expense tracking visualizations. Please wait..."
+        }
+        "Data Export to CSV" -> {
+            messages + "ChatBot: Preparing to export your data to CSV. This feature is coming soon."
+        }
+        else -> messages + "ChatBot: I'm sorry, I don't have a specific response for that option. How else can I assist you?"
+    }
+}
+
+private fun handleDocumentProcessing(subOption: String, messages: List<String>): List<String> {
+    return messages + when (subOption) {
+        "Named Entity Recognition" -> "ChatBot: Initiating Named Entity Recognition. Please upload a document to begin."
+        "AI Driven Document Classification" -> "ChatBot: Ready to classify your document. Please upload a document to start."
+        "Searching & Querying Document Data" -> "ChatBot: What would you like to search for in your documents?"
+        "Digitise Document[Pdf/Png]" -> "ChatBot: Please upload a PDF or PNG file to digitize."
+        else -> "ChatBot: I'm sorry, I don't have a specific response for that option. How else can I assist you?"
+    }
+}
+
+private fun handlePaymentAndInvoicing(subOption: String, messages: List<String>): List<String> {
+    return messages + when (subOption) {
+        "Invoice Ingestion" -> "ChatBot: Ready to process your invoice. Please upload an invoice image or PDF."
+        "Debt & Loan Management" -> "ChatBot: Let's review your debt and loan status. What specific information do you need?"
+        "Payment History" -> "ChatBot: I'll fetch your payment history. Please specify the time period you're interested in."
+        else -> "ChatBot: I'm sorry, I don't have a specific response for that option. How else can I assist you?"
+    }
+}
+
+private fun handleBudgetingAndFinance(subOption: String, messages: List<String>): List<String> {
+    return messages + when (subOption) {
+        "Net Worth" -> "ChatBot: I'll calculate your net worth. Please provide your total assets and liabilities."
+        "CTC Breakdown" -> "ChatBot: Let's break down your CTC. Can you provide your gross salary details?"
+        "Set Monthly Budget" -> "ChatBot: Great! Let's set up your monthly budget. What's your target budget amount?"
+        else -> "ChatBot: I'm sorry, I don't have a specific response for that option. How else can I assist you?"
+    }
+}
+
+private fun handleGeneralQueries(subOption: String, messages: List<String>): List<String> {
+    return messages + "ChatBot: I'm ready to answer your general queries. What would you like to know?"
 }
 
 
