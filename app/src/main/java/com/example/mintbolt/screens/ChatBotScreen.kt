@@ -1,9 +1,12 @@
 package com.example.mintbolt.screens
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Base64
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,6 +30,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -43,8 +49,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.mintbolt.R
+import com.example.mintbolt.viewmodel.ExpensesViewModel
+import kotlinx.coroutines.delay
 import java.io.File
 
 @Composable
@@ -76,6 +85,7 @@ class ComposeFileProvider : FileProvider(R.xml.filepaths) {
 
 @Composable
 fun ChatbotUI() {
+    val viewModel: ExpensesViewModel = viewModel()
     var messages by remember { mutableStateOf(listOf("ChatBot: Hello! How can I help you today?")) }
     var showOptions by remember { mutableStateOf(true) }
     var showSubOptions by remember { mutableStateOf(false) }
@@ -84,6 +94,7 @@ fun ChatbotUI() {
     var allowCameraInput by remember { mutableStateOf(false) }
     var allowGalleryInput by remember { mutableStateOf(false) }
     var allowTextInput by remember { mutableStateOf(true) }
+    var shouldFetchWithDelay by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     var imageUri by remember { mutableStateOf<Uri?>(null) }
@@ -103,6 +114,24 @@ fun ChatbotUI() {
         }
     }
 
+    // Collect state flows
+    val expensesSummary by viewModel.expensesSummary.collectAsState()
+    val barPlot by viewModel.barPlot.collectAsState()
+    val pieChart by viewModel.pieChart.collectAsState()
+    val heatmap by viewModel.heatmap.collectAsState()
+    val arima by viewModel.arima.collectAsState()
+    val error by viewModel.error.collectAsState()
+
+    LaunchedEffect(shouldFetchWithDelay) {
+        if (shouldFetchWithDelay) {
+            viewModel.fetchBarPlot(1000)
+            delay(1000) // 1-second delay
+            viewModel.fetchPieChart(1000)
+            delay(1000) // 1-second delay
+            viewModel.fetchHeatmap(1000)
+            shouldFetchWithDelay = false // Reset the flag
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -121,6 +150,28 @@ fun ChatbotUI() {
                     listOf("ChatBot", message)
                 }
                 ChatMessage(sender = sender, content = content)
+            }
+
+            // Display images if available
+            item {
+                expensesSummary?.let { summary ->
+                    Text("Expenses Summary: $summary")
+                }
+                barPlot?.let { plotUrl ->
+                    DisplayImage(base64String = plotUrl)
+                }
+                pieChart?.let { chartUrl ->
+                    DisplayImage(base64String = chartUrl)
+                }
+                heatmap?.let { mapUrl ->
+                    DisplayImage(base64String = mapUrl)
+                }
+                arima?.let { arimaUrl ->
+                    DisplayImage(base64String = arimaUrl)
+                }
+                error?.let { errorMessage ->
+                    Text("Error: $errorMessage", color = Color.Red)
+                }
             }
         }
 
@@ -154,7 +205,20 @@ fun ChatbotUI() {
                     messages = messages + "User: $subOption"
                     showSubOptions = false
                     allowUserInput = true
-                    messages = messages + "ChatBot: You've selected $subOption. What specific information would you like to know about this fruit's historical data and future predictions?"
+                    when (subOption) {
+                        "Summarise My Expenses" -> {
+                            viewModel.fetchExpensesSummary(1000) // Assuming employee ID is 1
+                            messages = messages + "ChatBot: Fetching your expense summary. Please wait..."
+                        }
+                        "Analyse Trends & Expenditure Patterns" -> {
+                            viewModel.fetchARIMA(1000) // Assuming employee ID is 1
+                            messages = messages + "ChatBot: Analyzing trends and expenditure patterns. This may take a moment..."
+                        }
+                        "Expense Tracking" -> {
+                            shouldFetchWithDelay = true
+                            messages = messages + "ChatBot: Generating expense tracking visualizations. Please wait..."
+                        }
+                    }
                 })
             }
 
@@ -203,6 +267,21 @@ fun ChatbotUI() {
             }
         }
     }
+}
+
+@Composable
+fun DisplayImage(base64String: String) {
+    val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
+    val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+    val imageBitmap = bitmap.asImageBitmap()
+
+    Image(
+        bitmap = imageBitmap,
+        contentDescription = "Generated Plot",
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+    )
 }
 
 
