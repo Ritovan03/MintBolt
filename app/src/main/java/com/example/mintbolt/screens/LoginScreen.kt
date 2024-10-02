@@ -156,7 +156,8 @@ fun LoginScreen(navController: NavHostController)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 128.dp, end = 128.dp),
+                        .padding(start = 128.dp, end = 128.dp)
+                        .align(Alignment.CenterHorizontally),
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.bgcolor))
                 ) {
                     Text("Log In", color = Color.Black)
