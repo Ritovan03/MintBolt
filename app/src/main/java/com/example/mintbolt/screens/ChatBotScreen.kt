@@ -98,6 +98,21 @@ fun ChatbotUI() {
     var shouldFetchWithDelay by remember { mutableStateOf(false) }
     var isInGeneralQueryMode by remember { mutableStateOf(false) }
 
+    //val generalQueryResponse by viewModel.generalQueryResponse.collectAsState()
+    val err by viewModel.err.collectAsState()
+
+//    LaunchedEffect(generalQueryResponse) {
+//        generalQueryResponse?.let {
+//            messages = messages + "ChatBot: $it"
+//        }
+//    }
+
+    LaunchedEffect(err) {
+        err?.let {
+            messages = messages + "ChatBot: $it"
+        }
+    }
+
     val context = LocalContext.current
     var imageUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -122,7 +137,6 @@ fun ChatbotUI() {
     val pieChart by viewModel.pieChart.collectAsState()
     val heatmap by viewModel.heatmap.collectAsState()
     val arima by viewModel.arima.collectAsState()
-    val error by viewModel.error.collectAsState()
 
     LaunchedEffect(shouldFetchWithDelay) {
         if (shouldFetchWithDelay) {
@@ -172,7 +186,7 @@ fun ChatbotUI() {
                 arima?.let { arimaUrl ->
                     DisplayImage(base64String = arimaUrl)
                 }
-                error?.let { errorMessage ->
+                err?.let { errorMessage ->
                     Text("Error: $errorMessage", color = Color.Red)
                 }
             }
@@ -235,7 +249,12 @@ fun ChatbotUI() {
                         onClick = {
                             if (userInput.isNotBlank()) {
                                 messages = messages + "User: $userInput"
-                                messages = messages + "ChatBot: I've received your message. How else can I assist you?"
+                                if (isInGeneralQueryMode) {
+                                    //viewModel.sendGeneralQuery(1000, userInput) // Assuming employee ID is 1000
+                                    messages = messages + "ChatBot: Processing your query..."
+                                } else {
+                                    messages = messages + "ChatBot: I've received your message. How else can I assist you?"
+                                }
                                 userInput = ""
                             }
                         },
@@ -413,28 +432,49 @@ private fun handleTransactionManagement(subOption: String, viewModel: ExpensesVi
 
 private fun handleDocumentProcessing(subOption: String, messages: List<String>): List<String> {
     return messages + when (subOption) {
-        "Named Entity Recognition" -> "ChatBot: Initiating Named Entity Recognition. Please upload a document to begin."
-        "AI Driven Document Classification" -> "ChatBot: Ready to classify your document. Please upload a document to start."
-        "Searching & Querying Document Data" -> "ChatBot: What would you like to search for in your documents?"
-        "Digitise Document[Pdf/Png]" -> "ChatBot: Please upload a PDF or PNG file to digitize."
+        "Named Entity Recognition" -> {
+
+            "ChatBot: Initiating Named Entity Recognition. Please upload a document to begin."
+        }
+        "AI Driven Document Classification" -> {
+            "ChatBot: Ready to classify your document. Please upload a document to start."
+        }
+        "Searching & Querying Document Data" -> {
+            "ChatBot: What would you like to search for in your documents?"
+        }
+        "Digitise Document[Pdf/Png]" -> {
+            "ChatBot: Please upload a PDF or PNG file to digitize."
+        }
         else -> "ChatBot: I'm sorry, I don't have a specific response for that option. How else can I assist you?"
     }
 }
 
 private fun handlePaymentAndInvoicing(subOption: String, messages: List<String>): List<String> {
     return messages + when (subOption) {
-        "Invoice Ingestion" -> "ChatBot: Ready to process your invoice. Please upload an invoice image or PDF."
-        "Debt & Loan Management" -> "ChatBot: Let's review your debt and loan status. What specific information do you need?"
-        "Payment History" -> "ChatBot: I'll fetch your payment history. Please specify the time period you're interested in."
+        "Invoice Ingestion" -> {
+            "ChatBot: Ready to process your invoice. Please upload an invoice image or PDF."
+        }
+        "Debt & Loan Management" -> {
+            "ChatBot: Let's review your debt and loan status. What specific information do you need?"
+        }
+        "Payment History" -> {
+            "ChatBot: I'll fetch your payment history. Please specify the time period you're interested in."
+        }
         else -> "ChatBot: I'm sorry, I don't have a specific response for that option. How else can I assist you?"
     }
 }
 
 private fun handleBudgetingAndFinance(subOption: String, messages: List<String>): List<String> {
     return messages + when (subOption) {
-        "Net Worth" -> "ChatBot: I'll calculate your net worth. Please provide your total assets and liabilities."
-        "CTC Breakdown" -> "ChatBot: Let's break down your CTC. Can you provide your gross salary details?"
-        "Set Monthly Budget" -> "ChatBot: Great! Let's set up your monthly budget. What's your target budget amount?"
+        "Net Worth" -> {
+            "ChatBot: I'll calculate your net worth. Please provide your total assets and liabilities."
+        }
+        "CTC Breakdown" -> {
+            "ChatBot: Let's break down your CTC. Can you provide your gross salary details?"
+        }
+        "Set Monthly Budget" -> {
+            "ChatBot: Great! Let's set up your monthly budget. What's your target budget amount?"
+        }
         else -> "ChatBot: I'm sorry, I don't have a specific response for that option. How else can I assist you?"
     }
 }

@@ -13,12 +13,14 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.BottomAppBar
@@ -59,8 +61,8 @@ fun HomeScreen(navController: NavHostController)  {
         ),
         BottomNavItem(
             label = "Analytics",
-            icon = Icons.Filled.ThumbUp,
-            selectedIcon = Icons.Outlined.ThumbUp,
+            icon = Icons.Filled.Info,
+            selectedIcon = Icons.Outlined.Info,
             route = "analytics"
         ),
         BottomNavItem(

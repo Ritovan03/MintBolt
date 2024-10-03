@@ -1,6 +1,7 @@
 package com.example.mintbolt.screens
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -61,6 +62,7 @@ import com.example.mintbolt.R
 fun LoginScreen(navController: NavHostController)
 {
 
+    val current = LocalContext.current
     val backgroundColor = Color(0xFF00C853)
 
     var email by remember { mutableStateOf("") }
@@ -152,7 +154,12 @@ fun LoginScreen(navController: NavHostController)
 
                 Button(
                     onClick = {
-                        navController.navigate("main")
+                        if(email == "123" && password == "12345")
+                        {navController.navigate("main")}
+                        else{
+                            Toast.makeText(current, "Invalid Credentials", Toast.LENGTH_SHORT).show()
+                        }
+
                     },
                     modifier = Modifier
                         .fillMaxWidth()

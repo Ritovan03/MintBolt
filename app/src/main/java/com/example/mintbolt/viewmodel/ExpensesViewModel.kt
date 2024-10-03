@@ -1,24 +1,20 @@
 package com.example.mintbolt.viewmodel
 
-import android.util.Base64
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.Headers
-import retrofit2.http.POST
-
-
-
-
-
+import org.json.JSONObject
 
 
 class ExpensesViewModel : ViewModel() {
+
+
+
+    private val _err = MutableStateFlow<String?>(null)
+    val err: StateFlow<String?> = _err
+
     private val _expensesSummary = MutableStateFlow<String?>(null)
     val expensesSummary: StateFlow<String?> = _expensesSummary
 
@@ -96,11 +92,6 @@ class ExpensesViewModel : ViewModel() {
             }
         }
     }
-
-
-
-
-
 
 }
 

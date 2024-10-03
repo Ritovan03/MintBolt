@@ -63,7 +63,7 @@ fun HomeContent(navController: NavHostController)
             Spacer(modifier = Modifier.height(16.dp))
             ExpenseSummaryCard(cardColor)
         }
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(32.dp))
         Card(
             colors = CardDefaults.cardColors(containerColor = Color.White),
             modifier = Modifier
@@ -89,7 +89,7 @@ fun TopBar() {
     ) {
         Column {
             Text(
-                "Hi Welcome Back",
+                "Hi Alice Smith",
                 color = Color.White,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
@@ -154,7 +154,7 @@ fun ChatbotButton(navController: NavHostController) {
         },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(24.dp),
+            .padding(start = 24.dp,end = 24.dp,top = 8.dp),
         colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.bgcolor))
     ) {
         Text("Converse With Chatbot", color = Color.Black)
@@ -260,6 +260,7 @@ fun CustomProgressBar(progress: Float, amount: String) {
         ) {
             Text(
                 text = "${(progress * 100).toInt()}%",
+                modifier = Modifier.clip(RoundedCornerShape(12.dp)),
                 color = Color.White,
 
             )
